@@ -232,6 +232,16 @@
 
 .architecture-canvas .react-flow__node {
   cursor: grab;
+  transition: opacity 160ms ease;
+}
+
+/* Search: everything that does not match fades back; edges only stay lit between two matches. */
+.architecture-canvas .react-flow__node.canvas-dim {
+  opacity: 0.16;
+}
+
+.architecture-canvas .react-flow__edge.canvas-dim {
+  opacity: 0.12;
 }
 
 .architecture-canvas .react-flow__node.dragging {

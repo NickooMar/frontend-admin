@@ -120,6 +120,16 @@ export const STRINGS = {
     institution: {
       schedules: (n: number) => plural(n, 'agenda', 'agendas'),
     },
+    search: {
+      label: 'Buscar en la marca',
+      placeholder: 'Buscar cabinas, multis, agendas o instituciones…',
+      clear: 'Limpiar búsqueda',
+      results: (found: number, total: number) => `${found} de ${total}`,
+      noResults: 'Sin resultados',
+      fitResults: 'Encuadrar resultados',
+      more: (n: number) => `+${n} más`,
+      hint: 'Enter va al primero · Esc limpia',
+    },
     legend: {
       title: 'Leyenda',
       edge: 'Cuenta asociada a la cabina con acceso a la agenda',
