@@ -6,15 +6,16 @@ import {STRINGS} from '@/lib/strings'
 import AppShell from './AppShell'
 
 const LoginScreen = lazy(() => import('@/screens/LoginScreen'))
-const DashboardScreen = lazy(() => import('@/screens/DashboardScreen'))
+const BrandsScreen = lazy(() => import('@/screens/brands/BrandsScreen'))
 
 const withSuspense = (element: React.ReactNode) => (
   <Suspense fallback={<FullScreenLoader label={STRINGS.shell.checkingSession} />}>{element}</Suspense>
 )
 
 /**
- * Route table. Everything under `RequireAuth` → `AppShell` is protected; new
- * admin modules (brands, kiosks, ...) are added as children of the shell.
+ * Route table. Everything under `RequireAuth` → `AppShell` is protected. Brands
+ * is the landing module: `/` redirects there and the selected brand lives in
+ * the URL (`/brands/:brandId`) so a refresh or a shared link reopens it.
  */
 export const routes = [
   {
@@ -26,7 +27,11 @@ export const routes = [
     children: [
       {
         element: <AppShell />,
-        children: [{index: true, element: withSuspense(<DashboardScreen />)}],
+        children: [
+          {index: true, element: <Navigate to="/brands" replace />},
+          {path: 'brands', element: withSuspense(<BrandsScreen />)},
+          {path: 'brands/:brandId', element: withSuspense(<BrandsScreen />)},
+        ],
       },
     ],
   },

@@ -2,6 +2,8 @@
  * UI copy. Spanish, like every other Diagnóstica frontend. Centralized so a
  * future i18next setup only has to move these keys, not hunt through JSX.
  */
+const plural = (count: number, singular: string, pluralForm: string) => `${count} ${count === 1 ? singular : pluralForm}`
+
 export const STRINGS = {
   app: {
     name: 'Diagnóstica Admin',
@@ -11,6 +13,11 @@ export const STRINGS = {
     title: 'Iniciar sesión',
     subtitle: 'Ingresá con tu cuenta de administrador global.',
     statement: 'Un solo panel para marcas, kioscos y configuración compartida.',
+    features: {
+      brands: 'Marcas y su arquitectura',
+      kiosks: 'Cabinas y multis de cada marca',
+      schedules: 'Agendas y sus vínculos',
+    },
     email: 'Email',
     emailPlaceholder: 'admin@diagnostica.com.ar',
     password: 'Contraseña',
@@ -29,7 +36,6 @@ export const STRINGS = {
     UNKNOWN: 'Ocurrió un error inesperado. Intentá de nuevo en unos minutos.',
   },
   shell: {
-    dashboard: 'Dashboard',
     account: 'Cuenta',
     logout: 'Cerrar sesión',
     environment: 'Entorno',
@@ -37,10 +43,6 @@ export const STRINGS = {
     navigation: 'Principal',
     openMenu: 'Abrir menú',
     closeMenu: 'Cerrar menú',
-    sectionGeneral: 'General',
-    sectionModules: 'Módulos',
-    /** Short badge for a module that is not wired up yet (fits the 240px sidebar). */
-    soonShort: 'Pronto',
   },
   theme: {
     label: 'Tema',
@@ -48,37 +50,114 @@ export const STRINGS = {
     dark: 'Oscuro',
     system: 'Sistema',
   },
-  modules: {
-    title: 'Módulos',
-    hint: 'Se habilitan en próximas iteraciones.',
-    soon: 'Próximamente',
-    open: 'Abrir módulo',
-    brands: {
-      label: 'Marcas',
-      title: 'Marcas',
-      description: 'Alta, edición y estado de las marcas de la plataforma.',
+  brands: {
+    navLabel: 'Marcas',
+    title: 'Marcas',
+    subtitle: 'Cabinas, multis y agendas de cada marca, con los vínculos que existen entre ellas.',
+    selectBrand: 'Marca',
+    selectPlaceholder: 'Seleccioná una marca',
+    inactive: 'Inactiva',
+    tenantUnavailable: 'Sin base de datos',
+    includeDeleted: 'Incluir eliminados',
+    refresh: 'Actualizar',
+    loadingBrands: 'Cargando marcas…',
+    loadingArchitecture: 'Cargando arquitectura…',
+    noBrands: 'No hay marcas en la base principal.',
+    brandsErrorTitle: 'No pudimos cargar las marcas',
+    errorTitle: 'No pudimos cargar la marca',
+    retry: 'Reintentar',
+    emptyTitle: 'Sin recursos',
+    emptyDescription: 'Esta marca no tiene cabinas, multis ni agendas para mostrar.',
+    canvasLabel: 'Arquitectura de la marca',
+    generatedAt: (when: string) => `Generado ${when}`,
+    summary: {
+      kiosks: (n: number) => plural(n, 'cabina', 'cabinas'),
+      multis: (n: number) => plural(n, 'multi', 'multis'),
+      schedules: (n: number) => plural(n, 'agenda', 'agendas'),
+      edges: (n: number) => plural(n, 'vínculo', 'vínculos'),
     },
-    kiosks: {
-      label: 'Kioscos',
-      title: 'Kioscos',
-      description: 'Registro de kioscos, vínculo con cada marca y estado de conexión.',
+    kinds: {
+      kiosk: 'Cabina',
+      multi: 'Multi',
+      schedule: 'Agenda',
+      institution: 'Institución',
     },
-    settings: {
-      /** Nav uses the short form; the module card and its page use the full one. */
-      label: 'Configuración',
-      title: 'Configuración global',
-      description: 'Parámetros compartidos entre todas las marcas.',
+    kiosk: {
+      connected: 'Conectada',
+      disconnected: 'Desconectada',
+      lastConnected: (when: string) => `Última conexión ${when}`,
+      neverConnected: 'Nunca se conectó',
+      exams: (n: number) => plural(n, 'examen configurado', 'exámenes configurados'),
+      noExams: 'Sin exámenes configurados',
+      accounts: (n: number) => plural(n, 'cuenta asociada', 'cuentas asociadas'),
+      noAccounts: 'Sin cuentas asociadas',
+      stationAccount: 'Cuenta de estación',
+      deleted: 'Eliminada',
+      keyboardMode: 'Modo teclado',
+      assistantMode: 'Asistente',
+      actions: 'Acciones',
+      edit: 'Editar',
+      duplicate: 'Duplicar en otra marca',
+      move: 'Mover a otra marca',
+      status: {
+        AVAILABLE: 'Disponible',
+        PENDING: 'Pendiente',
+        BUSY: 'Ocupada',
+        IN_USE: 'En uso',
+        IN_USE_BY_KIOSK_USER: 'En uso por cuenta de estación',
+        MAINTENANCE: 'En mantenimiento',
+        DISABLED: 'Deshabilitada',
+      } as Record<string, string>,
     },
-  },
-  dashboard: {
-    title: 'Dashboard',
-    welcome: (name: string) => `Hola, ${name}.`,
-  },
-  session: {
-    title: 'Sesión',
-    admin: 'Administrador',
-    role: 'Rol',
-    lastLogin: 'Último ingreso',
-    lastLoginEmpty: 'Sin registro',
+    schedule: {
+      urgency: 'Urgencias',
+      users: (n: number) => plural(n, 'usuario con acceso', 'usuarios con acceso'),
+      noUsers: 'Sin usuarios con acceso',
+      availability: 'Disponibilidad semanal',
+      deleted: 'Eliminada',
+      noInstitution: 'Sin institución',
+    },
+    institution: {
+      schedules: (n: number) => plural(n, 'agenda', 'agendas'),
+    },
+    legend: {
+      title: 'Leyenda',
+      edge: 'Cuenta asociada a la cabina con acceso a la agenda',
+    },
+    edge: {
+      accounts: (n: number) => plural(n, 'cuenta', 'cuentas'),
+    },
+    dialog: {
+      editTitle: 'Editar',
+      editSoon: 'La edición de cabinas y multis desde el panel global llega en una próxima iteración.',
+      duplicateTitle: 'Duplicar en otra marca',
+      duplicateDescription:
+        'Se crea una copia con la configuración (exámenes, parámetros, dispositivos). No se copian credenciales, calibraciones, cuentas de estación ni agendas.',
+      moveTitle: 'Mover a otra marca',
+      moveDescription:
+        'La cabina tiene que estar desconectada y sin sesión activa. El dispositivo y su cuenta de estación se reprovisionan en la marca destino.',
+      targetBrand: 'Marca destino',
+      location: 'Nombre / ubicación de la copia',
+      submitDuplicate: 'Duplicar',
+      submitMove: 'Mover',
+      submitting: 'Procesando…',
+      cancel: 'Cancelar',
+      close: 'Cerrar',
+      duplicated: (location: string, brand: string) => `Se creó «${location}» en ${brand}.`,
+      omittedTitle: 'Campos no copiados',
+      notCopiedTitle: 'Hay que recrear en la marca destino',
+      moveNotImplemented:
+        'La migración entre marcas todavía no está disponible. Se validaron la marca, la cabina y el destino; el detalle pendiente está documentado en el backend.',
+      resultErrorTitle: 'No se pudo completar la operación',
+    },
+    errors: {
+      BRAND_NOT_FOUND: 'La marca ya no existe.',
+      TENANT_UNAVAILABLE: 'La marca no tiene una base de datos accesible desde este servidor.',
+      KIOSK_NOT_FOUND: 'La cabina ya no existe en la marca de origen.',
+      TARGET_BRAND_NOT_FOUND: 'La marca destino no existe.',
+      TARGET_TENANT_UNAVAILABLE: 'La marca destino no tiene una base de datos accesible.',
+      KIOSK_BUSY: 'La cabina está conectada o tiene una sesión activa. Desconectala antes de moverla.',
+      MOVE_NOT_IMPLEMENTED: 'La migración entre marcas todavía no está implementada.',
+    } as Record<string, string>,
   },
 } as const

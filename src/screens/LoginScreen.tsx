@@ -1,8 +1,7 @@
-import {AlertCircleIcon, EyeIcon, EyeOffIcon, Loader2Icon} from 'lucide-react'
+import {AlertCircleIcon, CalendarDaysIcon, EyeIcon, EyeOffIcon, Loader2Icon, type LucideIcon, MonitorIcon, StoreIcon} from 'lucide-react'
 import {type FormEvent, useState} from 'react'
 import {useLocation, useNavigate} from 'react-router-dom'
 import {signIn} from '@/auth/authActions'
-import {MODULE_ITEMS} from '@/app/navigation'
 import {BrandLockup} from '@/components/BrandMark'
 import {CommitHash, EnvironmentPill} from '@/components/EnvironmentPill'
 import {Alert, AlertDescription, AlertTitle} from '@/components/ui/alert'
@@ -13,6 +12,13 @@ import {toApiError} from '@/lib/api'
 import {STRINGS} from '@/lib/strings'
 import {ThemeToggle} from '@/theme/ThemeToggle'
 import {AUTH_ERROR_CODES} from '@/types/auth'
+
+/** What the panel does, listed on the brand panel before signing in. */
+const FEATURES: ReadonlyArray<{icon: LucideIcon; label: string}> = [
+  {icon: StoreIcon, label: STRINGS.login.features.brands},
+  {icon: MonitorIcon, label: STRINGS.login.features.kiosks},
+  {icon: CalendarDaysIcon, label: STRINGS.login.features.schedules},
+]
 
 function messageForError(error: unknown): string {
   const apiError = toApiError(error)
@@ -80,10 +86,10 @@ export default function LoginScreen() {
           </p>
 
           <ul className="hidden flex-col gap-3 lg:flex">
-            {MODULE_ITEMS.map(({to, title, icon: Icon}) => (
-              <li key={to} className="flex items-center gap-2.5 text-[13px] leading-[18px] opacity-55">
+            {FEATURES.map(({label, icon: Icon}) => (
+              <li key={label} className="flex items-center gap-2.5 text-[13px] leading-[18px] opacity-55">
                 <Icon aria-hidden className="size-[15px] shrink-0" />
-                {title}
+                {label}
               </li>
             ))}
           </ul>
