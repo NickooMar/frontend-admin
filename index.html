@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#ffffff" />
+    <meta name="description" content="Administración global de la plataforma Diagnóstica" />
+    <title>Diagnóstica Admin</title>
+    <script>
+      // Paints the stored theme before the first frame so a dark session never
+      // flashes white. Kept in sync with src/theme/theme.ts.
+      ;(() => {
+        try {
+          var stored = localStorage.getItem('diagnostica-admin-theme')
+          var dark =
+            stored === 'dark' || (stored !== 'light' && window.matchMedia('(prefers-color-scheme: dark)').matches)
+          document.documentElement.classList.toggle('dark', dark)
+          document.documentElement.style.colorScheme = dark ? 'dark' : 'light'
+          document.documentElement.dataset.theme = dark ? 'dark' : 'light'
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', dark ? '#0a0a0a' : '#ffffff')
+        } catch (error) {
+          /* storage blocked: fall through to the light default */
+        }
+      })()
+    </script>
+  </head>
+  <body>
+    <noscript>Necesitás habilitar JavaScript para usar esta aplicación.</noscript>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
