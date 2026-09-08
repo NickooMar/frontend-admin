@@ -2,6 +2,7 @@
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
 @import "@fontsource-variable/geist";
+@import "@xyflow/react/dist/style.css";
 
 @custom-variant dark (&:is(.dark *));
 
@@ -151,4 +152,98 @@
       mask-image: radial-gradient(115% 85% at 18% 12%, oklch(0 0 0) 0%, transparent 72%);
     }
   }
+}
+
+/*
+ * Architecture canvas (React Flow). Every colour points at a theme token so the
+ * canvas follows the light/dark toggle without React Flow's own colour mode.
+ * The `-default` variables are the library's fallbacks; overriding them here
+ * (scoped, so they beat `.react-flow.dark`) is what recolours the dot grid.
+ */
+.architecture-canvas .react-flow,
+.architecture-canvas .react-flow.dark {
+  --canvas-dot: color-mix(in oklch, var(--foreground) 16%, transparent);
+  --xy-background-color: var(--card);
+  --xy-background-pattern-dots-color-default: var(--canvas-dot);
+  --xy-edge-stroke: color-mix(in oklch, var(--foreground) 38%, transparent);
+  --xy-edge-stroke-selected: var(--foreground);
+  --xy-edge-stroke-width: 1.5;
+  --xy-edge-label-background-color: var(--popover);
+  --xy-edge-label-color: var(--muted-foreground);
+  --xy-handle-background-color: var(--muted-foreground);
+  --xy-handle-border-color: var(--card);
+  --xy-controls-button-background-color: var(--popover);
+  --xy-controls-button-background-color-hover: var(--muted);
+  --xy-controls-button-color: var(--foreground);
+  --xy-controls-button-color-hover: var(--foreground);
+  --xy-controls-button-border-color: var(--border);
+  --xy-controls-box-shadow: 0 1px 2px color-mix(in oklch, var(--foreground) 8%, transparent);
+  --xy-minimap-background-color: var(--popover);
+  --xy-minimap-mask-background-color: color-mix(in oklch, var(--foreground) 6%, transparent);
+  --xy-minimap-mask-stroke-color: var(--border);
+  --xy-minimap-node-background-color: color-mix(in oklch, var(--foreground) 22%, transparent);
+  --xy-minimap-node-stroke-color: transparent;
+  --xy-node-boxshadow-selected: none;
+  --xy-attribution-background-color: transparent;
+  font-family: inherit;
+}
+
+.architecture-canvas .react-flow__attribution {
+  font-size: 10px;
+  color: var(--muted-foreground);
+}
+
+.architecture-canvas .react-flow__attribution a {
+  color: inherit;
+}
+
+.architecture-canvas .react-flow__controls {
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+
+.architecture-canvas .react-flow__controls-button svg {
+  fill: currentColor;
+}
+
+.architecture-canvas .react-flow__minimap {
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  outline: 1px solid var(--border);
+}
+
+.architecture-canvas .react-flow__edge-path {
+  stroke-dasharray: 6 4;
+}
+
+.architecture-canvas .react-flow__edge.selected .react-flow__edge-path {
+  stroke-dasharray: none;
+}
+
+.architecture-canvas .react-flow__edge-textbg {
+  rx: 4;
+}
+
+.architecture-canvas .react-flow__handle {
+  width: 8px;
+  height: 8px;
+  border-width: 2px;
+}
+
+.architecture-canvas .react-flow__node {
+  cursor: grab;
+  transition: opacity 160ms ease;
+}
+
+/* Search: everything that does not match fades back; edges only stay lit between two matches. */
+.architecture-canvas .react-flow__node.canvas-dim {
+  opacity: 0.16;
+}
+
+.architecture-canvas .react-flow__edge.canvas-dim {
+  opacity: 0.12;
+}
+
+.architecture-canvas .react-flow__node.dragging {
+  cursor: grabbing;
 }

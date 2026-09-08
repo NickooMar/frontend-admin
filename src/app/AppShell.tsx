@@ -5,7 +5,6 @@ import {signOut} from '@/auth/authActions'
 import {useAuthStore} from '@/auth/authStore'
 import {BrandLockup} from '@/components/BrandMark'
 import {CommitHash, EnvironmentPill} from '@/components/EnvironmentPill'
-import {Badge} from '@/components/ui/badge'
 import {Button} from '@/components/ui/button'
 import {
   DropdownMenu,
@@ -21,23 +20,12 @@ import {formatDate, initials} from '@/lib/format'
 import {STRINGS} from '@/lib/strings'
 import {cn} from '@/lib/utils'
 import {ThemeToggle} from '@/theme/ThemeToggle'
-import {GENERAL_ITEMS, MODULE_ITEMS, type NavItem} from './navigation'
+import {NAV_ITEMS, type NavItem} from './navigation'
 
-const SECTION_LABEL = 'px-3 pb-1.5 text-[11px] font-medium tracking-[0.06em] text-muted-foreground uppercase'
 const NAV_ITEM = 'flex h-8 items-center gap-2 rounded-md pl-3 text-sm transition-colors'
 
 function NavItemLink({item, onNavigate}: {item: NavItem; onNavigate?: () => void}) {
-  const {to, label, icon: Icon, end, disabled} = item
-
-  if (disabled) {
-    return (
-      <span aria-disabled className={cn(NAV_ITEM, 'cursor-not-allowed pr-2 text-muted-foreground')}>
-        <Icon aria-hidden className="size-4 shrink-0" />
-        <span className="flex-1 truncate">{label}</span>
-        <Badge size="xs">{STRINGS.shell.soonShort}</Badge>
-      </span>
-    )
-  }
+  const {to, label, icon: Icon, end} = item
 
   return (
     <NavLink
@@ -59,23 +47,13 @@ function NavItemLink({item, onNavigate}: {item: NavItem; onNavigate?: () => void
   )
 }
 
-/** Section list shared by the desktop rail and the mobile drawer. */
+/** Module list shared by the desktop rail and the mobile drawer. */
 function SidebarNav({onNavigate}: {onNavigate?: () => void}) {
   return (
-    <nav aria-label={STRINGS.shell.navigation} className="flex flex-1 flex-col p-2 pt-3">
-      <p className={SECTION_LABEL}>{STRINGS.shell.sectionGeneral}</p>
-      <div className="flex flex-col gap-0.5">
-        {GENERAL_ITEMS.map((item) => (
-          <NavItemLink key={item.to} item={item} onNavigate={onNavigate} />
-        ))}
-      </div>
-
-      <p className={cn(SECTION_LABEL, 'pt-5')}>{STRINGS.shell.sectionModules}</p>
-      <div className="flex flex-col gap-0.5">
-        {MODULE_ITEMS.map((item) => (
-          <NavItemLink key={item.to} item={item} onNavigate={onNavigate} />
-        ))}
-      </div>
+    <nav aria-label={STRINGS.shell.navigation} className="flex flex-1 flex-col gap-0.5 p-2 pt-3">
+      {NAV_ITEMS.map((item) => (
+        <NavItemLink key={item.to} item={item} onNavigate={onNavigate} />
+      ))}
     </nav>
   )
 }
@@ -97,8 +75,7 @@ function SidebarFooter() {
 /** Screen title for the header: derived from the route so modules get it for free. */
 function useCurrentSection(): NavItem | undefined {
   const {pathname} = useLocation()
-  const items = [...GENERAL_ITEMS, ...MODULE_ITEMS]
-  return items.find((item) => (item.end ? pathname === item.to : pathname.startsWith(item.to))) ?? items[0]
+  return NAV_ITEMS.find((item) => (item.end ? pathname === item.to : pathname.startsWith(item.to))) ?? NAV_ITEMS[0]
 }
 
 /**
@@ -116,7 +93,7 @@ export default function AppShell() {
   const SectionIcon = section?.icon
 
   return (
-    <div className="flex min-h-svh bg-background">
+    <div className="flex h-svh bg-background">
       <aside className="hidden w-60 shrink-0 flex-col border-r bg-sidebar text-sidebar-foreground md:flex">
         <div className="flex h-14 shrink-0 items-center border-b px-4">
           <BrandLockup badgeClassName="size-7" />
@@ -125,7 +102,7 @@ export default function AppShell() {
         <SidebarFooter />
       </aside>
 
-      <div className="flex min-w-0 flex-1 flex-col">
+      <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
         <header className="flex h-14 shrink-0 items-center justify-between gap-3 border-b bg-sidebar px-3 md:bg-transparent md:px-6">
           <div className="flex min-w-0 items-center gap-2.5">
             <Sheet open={menuOpen} onOpenChange={setMenuOpen}>
@@ -180,7 +157,7 @@ export default function AppShell() {
           </div>
         </header>
 
-        <main className="flex-1 px-4 py-5 md:px-6 md:py-7">
+        <main className="flex min-h-0 flex-1 flex-col overflow-auto px-4 py-5 md:px-6 md:py-6">
           <Outlet />
         </main>
       </div>
