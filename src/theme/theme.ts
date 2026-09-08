@@ -12,8 +12,8 @@ const THEME_PREFERENCES: readonly ThemePreference[] = ['light', 'dark', 'system'
 
 /** `<meta name="theme-color">` values; match `--background` in each mode. */
 const THEME_COLORS: Record<ResolvedTheme, string> = {
-  light: '#ffffff',
-  dark: '#0a0a0a',
+  light: '#fbfcff',
+  dark: '#0d1019',
 }
 
 export const isThemePreference = (value: unknown): value is ThemePreference =>
