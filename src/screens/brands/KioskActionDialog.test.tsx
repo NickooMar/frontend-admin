@@ -127,12 +127,4 @@ describe('KioskActionDialog', () => {
     expect(alert).toHaveTextContent('MOVE_NOT_IMPLEMENTED')
     expect(adminBrandsService.moveKiosk).toHaveBeenCalledWith('a', 'k1', {targetBrandId: 'b'})
   })
-
-  it('edit is a placeholder for now', () => {
-    const onClose = vi.fn()
-    render(<KioskActionDialog action="edit" kiosk={kiosk} brand={alpha} brands={[alpha]} onClose={onClose} />)
-
-    expect(screen.getByRole('dialog')).toHaveTextContent('próxima iteración')
-    expect(adminBrandsService.duplicateKiosk).not.toHaveBeenCalled()
-  })
 })

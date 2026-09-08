@@ -10,9 +10,17 @@ import {Skeleton} from '@/components/ui/skeleton'
 import {formatDateTime} from '@/lib/format'
 import {STRINGS} from '@/lib/strings'
 import {cn} from '@/lib/utils'
-import type {AdminBrandSummary, BrandArchitecture, KioskAction, KioskNodeData} from '@/types/brands'
+import {
+  type AdminBrandSummary,
+  type BrandArchitecture,
+  editSectionOf,
+  isEditAction,
+  type KioskAction,
+  type KioskNodeData,
+} from '@/types/brands'
 import {ArchitectureCanvas} from './architecture/ArchitectureCanvas'
 import {BrandSelector} from './BrandSelector'
+import {KioskEditDialog} from './edit/KioskEditDialog'
 import {brandErrorMessage, KioskActionDialog} from './KioskActionDialog'
 import {KioskActionsContext} from './kioskActions'
 
@@ -216,7 +224,18 @@ export default function BrandsScreen() {
         ) : null}
       </section>
 
-      {dialog && selectedBrand ? (
+      {dialog && selectedBrand && isEditAction(dialog.action) ? (
+        <KioskEditDialog
+          key={`${dialog.action}:${dialog.kiosk._id}`}
+          section={editSectionOf(dialog.action)}
+          kiosk={dialog.kiosk}
+          brand={selectedBrand}
+          onClose={() => setDialog(null)}
+          onSaved={() => {
+            if (brandId) void loadArchitecture(brandId, {force: true})
+          }}
+        />
+      ) : dialog && selectedBrand && !isEditAction(dialog.action) ? (
         <KioskActionDialog
           key={`${dialog.action}:${dialog.kiosk._id}`}
           action={dialog.action}

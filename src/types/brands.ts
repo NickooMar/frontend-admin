@@ -172,4 +172,174 @@ export const BRAND_ERROR_CODES = {
 
 export type BrandErrorCode = (typeof BRAND_ERROR_CODES)[keyof typeof BRAND_ERROR_CODES]
 
-export type KioskAction = 'edit' | 'duplicate' | 'move'
+/** Editable sections of a kiosk/multi; each maps to one PATCH endpoint. */
+export const KIOSK_EDIT_SECTIONS = ['data', 'version', 'devices', 'availableExams', 'params'] as const
+export type KioskEditSection = (typeof KIOSK_EDIT_SECTIONS)[number]
+
+export type KioskAction = 'duplicate' | 'move' | `edit:${KioskEditSection}`
+export type KioskTransferAction = Exclude<KioskAction, `edit:${string}`>
+
+export const isEditAction = (action: KioskAction): action is `edit:${KioskEditSection}` => action.startsWith('edit:')
+export const editSectionOf = (action: `edit:${KioskEditSection}`): KioskEditSection => action.slice('edit:'.length) as KioskEditSection
+
+export interface KioskDevice {
+  type?: string
+  subType?: string
+  name?: string
+  nameToShow?: string
+  data?: Record<string, unknown>
+  ledNumber?: number | null
+  isEnabled?: boolean
+  videoAnalysis?: boolean
+  analysisContext?: string
+  compatibleWithKioskMode?: boolean
+  [key: string]: unknown
+}
+
+export interface InstructionImage {
+  key: string
+  provider?: string
+  bucket?: string
+  contentType?: string
+  originalName?: string
+  /** Signed URL minted on read; never persisted. */
+  url?: string
+}
+
+export interface AvailableExamInstruction {
+  id?: string
+  title?: string
+  description?: string
+  image?: InstructionImage
+}
+
+export interface AvailableExam {
+  type?: string
+  subtype?: string | null
+  name?: string
+  customPrompt?: string | null
+  devices?: string[]
+  instructions?: AvailableExamInstruction[]
+  /** Derived by the backend from the linked video device; read-only. */
+  videoAnalysis?: boolean
+  analysisContext?: string
+  [key: string]: unknown
+}
+
+export interface EcgFilterSetting {
+  active: boolean
+  value: string | number
+}
+
+export interface EcgConfig {
+  filter: {frec: EcgFilterSetting; muscle: EcgFilterSetting; baseline: EcgFilterSetting}
+  stillHereCountdownPeriod: number
+  stillHerePeriod: number
+  stillHereStart: number
+}
+
+export interface MonitorVital {
+  min: number | string
+  max: number | string
+  isAlarmActive: boolean
+  switchOn: boolean
+}
+
+export interface MonitorNibp {
+  minSys: number | string
+  maxSys: number | string
+  minDia: number | string
+  maxDia: number | string
+  measureInterval: number | string
+  isAlarmActive: boolean
+  switchOn: boolean
+}
+
+export interface MonitorConfig {
+  ECG: MonitorVital
+  RESP: MonitorVital
+  SPO2: MonitorVital
+  TEMP: MonitorVital
+  NIBP: MonitorNibp
+}
+
+export interface MultiparametricMonitorParams {
+  config: MonitorConfig
+  showInstructions: boolean
+  alarmInterval: number | string
+}
+
+export interface NetworkQualityParams {
+  enabled: boolean
+  intervalMs: number
+  minDownloadKbps: number
+  minUploadKbps: number
+  maxLatencyMs: number
+  maxPacketLossPercent: number
+}
+
+export interface KioskWelcomeVideo {
+  key: string
+  provider?: string
+  bucket?: string
+  contentType?: string
+  originalName?: string
+  size?: number
+  updatedAt?: string
+  url?: string
+}
+
+export interface KioskParams {
+  ecg?: {config?: Partial<EcgConfig>}
+  multiparametricMonitor?: Partial<Omit<MultiparametricMonitorParams, 'config'>> & {config?: Partial<MonitorConfig>}
+  networkQuality?: Partial<NetworkQualityParams>
+  keyboardMode?: boolean
+  assistantMode?: boolean
+  welcomeVideo?: KioskWelcomeVideo | null
+  [key: string]: unknown
+}
+
+/** Full kiosk document served by `GET /brands/:brandId/kiosks/:kioskId` (secrets already redacted). */
+export interface AdminKioskDetail {
+  _id: string
+  type: KioskType
+  location: string
+  status?: string | null
+  connected?: boolean
+  lastConnected?: string | null
+  lastDisconnected?: string | null
+  deleted?: boolean
+  softwareVersion: Record<string, unknown>
+  devices: KioskDevice[] | Record<string, KioskDevice>
+  availableExams: AvailableExam[]
+  params: KioskParams
+  zoomFactor?: number
+  measurementCalibrations?: unknown[]
+  reportThirdParty?: {url?: string}
+  [key: string]: unknown
+}
+
+export interface KioskDataUpdate {
+  location: string
+  type: KioskType
+  status?: string
+}
+
+/** Body of each section PATCH, keyed by section. */
+export interface KioskSectionBodies {
+  data: KioskDataUpdate
+  version: {softwareVersion: Record<string, string>}
+  devices: {devices: KioskDevice[]}
+  availableExams: {availableExams: AvailableExam[]}
+  params: {
+    params: {
+      ecg: {config: EcgConfig}
+      multiparametricMonitor: MultiparametricMonitorParams
+      networkQuality?: NetworkQualityParams
+      keyboardMode?: boolean
+      assistantMode?: boolean
+    }
+  }
+}
+
+export const KIOSK_STATUSES = ['AVAILABLE', 'PENDING', 'BUSY', 'MAINTENANCE', 'IN_USE', 'IN_USE_BY_KIOSK_USER', 'DISABLED'] as const

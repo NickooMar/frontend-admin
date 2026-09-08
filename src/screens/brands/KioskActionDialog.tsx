@@ -10,7 +10,13 @@ import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from '@/c
 import {type NormalizedApiError, toApiError} from '@/lib/api'
 import {STRINGS} from '@/lib/strings'
 import {adminBrandsService} from '@/services/adminBrandsService'
-import {type AdminBrandSummary, BRAND_ERROR_CODES, type DuplicateKioskResult, type KioskAction, type KioskNodeData} from '@/types/brands'
+import {
+  type AdminBrandSummary,
+  BRAND_ERROR_CODES,
+  type DuplicateKioskResult,
+  type KioskNodeData,
+  type KioskTransferAction,
+} from '@/types/brands'
 
 const COPY = STRINGS.brands.dialog
 
@@ -21,7 +27,7 @@ export function brandErrorMessage(error: NormalizedApiError): string {
 }
 
 export interface KioskActionDialogProps {
-  action: KioskAction
+  action: KioskTransferAction
   kiosk: KioskNodeData
   /** Brand the kiosk currently belongs to. */
   brand: AdminBrandSummary
@@ -40,8 +46,9 @@ type Phase =
 const kindLabel = (kiosk: KioskNodeData) => (kiosk.type === 'MULTI' ? STRINGS.brands.kinds.multi : STRINGS.brands.kinds.kiosk)
 
 /**
- * Contextual kiosk/multi operations. `edit` is a placeholder; `duplicate` is
- * wired end to end; `move` calls the backend boundary and surfaces its answer.
+ * Cross-brand kiosk/multi operations: `duplicate` is wired end to end; `move`
+ * calls the backend boundary and surfaces its answer. Editing lives in
+ * `edit/KioskEditDialog`.
  */
 export function KioskActionDialog({action, kiosk, brand, brands, onClose, onDuplicated}: KioskActionDialogProps) {
   const targets = brands.filter((candidate) => candidate.tenant.available)
@@ -49,7 +56,7 @@ export function KioskActionDialog({action, kiosk, brand, brands, onClose, onDupl
   const [location, setLocation] = useState(`${kiosk.location} (copia)`)
   const [phase, setPhase] = useState<Phase>({kind: 'form'})
 
-  const title = action === 'edit' ? COPY.editTitle : action === 'duplicate' ? COPY.duplicateTitle : COPY.moveTitle
+  const title = action === 'duplicate' ? COPY.duplicateTitle : COPY.moveTitle
   const submitting = phase.kind === 'submitting'
   const targetBrand = brands.find((candidate) => candidate._id === targetBrandId)
 
@@ -84,18 +91,10 @@ export function KioskActionDialog({action, kiosk, brand, brands, onClose, onDupl
           <DialogTitle>
             {title} · {kiosk.location}
           </DialogTitle>
-          <DialogDescription>
-            {action === 'edit' ? COPY.editSoon : action === 'duplicate' ? COPY.duplicateDescription : COPY.moveDescription}
-          </DialogDescription>
+          <DialogDescription>{action === 'duplicate' ? COPY.duplicateDescription : COPY.moveDescription}</DialogDescription>
         </DialogHeader>
 
-        {action === 'edit' ? (
-          <DialogFooter>
-            <Button type="button" onClick={onClose}>
-              {COPY.close}
-            </Button>
-          </DialogFooter>
-        ) : phase.kind === 'duplicated' ? (
+        {phase.kind === 'duplicated' ? (
           <DuplicatedResult result={phase.result} targetName={targetBrand?.name ?? phase.result.targetBrandId} onClose={onClose} />
         ) : (
           <form onSubmit={handleSubmit} noValidate>
@@ -158,7 +157,7 @@ export function KioskActionDialog({action, kiosk, brand, brands, onClose, onDupl
   )
 }
 
-function OperationError({action, error}: {action: KioskAction; error: NormalizedApiError}) {
+function OperationError({action, error}: {action: KioskTransferAction; error: NormalizedApiError}) {
   const notImplemented = action === 'move' && error.code === BRAND_ERROR_CODES.MOVE_NOT_IMPLEMENTED
 
   return (

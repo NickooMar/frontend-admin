@@ -77,13 +77,17 @@ the last one). Backend: `/api/v1/admin/brands/**` — see
 | `GET /api/v1/admin/brands/:brandId/architecture?includeDeleted=` | one normalized payload: `nodes` (kiosk / multi / institution / schedule), `edges` (kiosk → agenda via the accounts attached to the kiosk), `summary` |
 | `POST …/kiosks/:kioskId/duplicate` | configuration-only copy into a target brand (wired end to end) |
 | `POST …/kiosks/:kioskId/move` | validated boundary, answers `501 MOVE_NOT_IMPLEMENTED` for now |
+| `GET …/kiosks/:kioskId` | full kiosk document for the edit modals (secrets redacted) |
+| `PATCH …/kiosks/:kioskId/{data,version,devices,available-exams,params}` | one endpoint per editable section, validated with the brand panel's own Joi schemas |
 
 Canvas: `src/screens/brands/architecture/buildGraph.ts` turns the payload into
 React Flow nodes with a deterministic column layout (multis | cabinas |
 institution groups holding their agendas). Positions are in memory only —
 dragging is for reading the diagram, nothing is persisted. Kiosk cards expose
-**Editar** (placeholder), **Duplicar en otra marca** and **Mover a otra marca**
-through `KioskActionsContext` → `KioskActionDialog`.
+**Editar** (a submenu with one modal per section: datos del dispositivo, versiones de
+software, dispositivos, exámenes disponibles, parámetros — `src/screens/brands/edit/`),
+**Duplicar en otra marca** and **Mover a otra marca** through `KioskActionsContext`.
+The device and exam catalogs in `src/data/` mirror `frontend-diagnostica`'s.
 
 ## Layout
 

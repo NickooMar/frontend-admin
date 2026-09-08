@@ -2,11 +2,17 @@ import {Handle, type NodeProps, Position} from '@xyflow/react'
 import {
   ActivityIcon,
   CopyIcon,
+  CpuIcon,
+  IdCardIcon,
+  type LucideIcon,
   MonitorIcon,
   MoreHorizontalIcon,
   MoveRightIcon,
   PanelsTopLeftIcon,
   PencilIcon,
+  SlidersHorizontalIcon,
+  StethoscopeIcon,
+  TagIcon,
   UsersRoundIcon,
   WifiIcon,
   WifiOffIcon,
@@ -14,16 +20,33 @@ import {
 import {memo} from 'react'
 import {Badge} from '@/components/ui/badge'
 import {Button} from '@/components/ui/button'
-import {DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger} from '@/components/ui/dropdown-menu'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuSub,
+  DropdownMenuSubContent,
+  DropdownMenuSubTrigger,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
 import {formatDateTime} from '@/lib/format'
 import {STRINGS} from '@/lib/strings'
 import {cn} from '@/lib/utils'
-import type {KioskNodeData} from '@/types/brands'
+import {KIOSK_EDIT_SECTIONS, type KioskNodeData} from '@/types/brands'
 import {useKioskActions} from '../../kioskActions'
 import type {KioskFlowNode} from '../buildGraph'
 import {NodeRow} from './NodeRow'
 
 const COPY = STRINGS.brands.kiosk
+
+const SECTION_ICONS: Record<(typeof KIOSK_EDIT_SECTIONS)[number], LucideIcon> = {
+  data: IdCardIcon,
+  version: TagIcon,
+  devices: CpuIcon,
+  availableExams: StethoscopeIcon,
+  params: SlidersHorizontalIcon,
+}
 
 /** Colour per resource type — reused by the legend and the minimap. */
 export const KIOSK_TILE = {
@@ -97,10 +120,24 @@ export const KioskNode = memo(function KioskNode({data, selected}: NodeProps<Kio
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="nodrag nopan w-56">
-            <DropdownMenuItem onSelect={() => onAction('edit', data)}>
-              <PencilIcon aria-hidden />
-              {COPY.edit}
-            </DropdownMenuItem>
+            <DropdownMenuSub>
+              <DropdownMenuSubTrigger>
+                <PencilIcon aria-hidden />
+                {COPY.edit}
+              </DropdownMenuSubTrigger>
+              <DropdownMenuSubContent className="nodrag nopan w-56">
+                {KIOSK_EDIT_SECTIONS.map((section) => {
+                  const SectionIcon = SECTION_ICONS[section]
+                  return (
+                    <DropdownMenuItem key={section} onSelect={() => onAction(`edit:${section}`, data)}>
+                      <SectionIcon aria-hidden />
+                      {COPY.editSections[section]}
+                    </DropdownMenuItem>
+                  )
+                })}
+              </DropdownMenuSubContent>
+            </DropdownMenuSub>
+            <DropdownMenuSeparator />
             <DropdownMenuItem onSelect={() => onAction('duplicate', data)}>
               <CopyIcon aria-hidden />
               {COPY.duplicate}
