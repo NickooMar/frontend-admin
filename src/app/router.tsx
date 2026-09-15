@@ -7,6 +7,7 @@ import AppShell from './AppShell'
 
 const LoginScreen = lazy(() => import('@/screens/LoginScreen'))
 const BrandsScreen = lazy(() => import('@/screens/brands/BrandsScreen'))
+const BrandParamsScreen = lazy(() => import('@/screens/brands/params/BrandParamsScreen'))
 
 const withSuspense = (element: React.ReactNode) => (
   <Suspense fallback={<FullScreenLoader label={STRINGS.shell.checkingSession} />}>{element}</Suspense>
@@ -31,6 +32,7 @@ export const routes = [
           {index: true, element: <Navigate to="/brands" replace />},
           {path: 'brands', element: withSuspense(<BrandsScreen />)},
           {path: 'brands/:brandId', element: withSuspense(<BrandsScreen />)},
+          {path: 'brands/:brandId/params', element: withSuspense(<BrandParamsScreen />)},
         ],
       },
     ],

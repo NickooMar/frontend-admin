@@ -217,6 +217,11 @@ export const BRAND_ERROR_CODES = {
   SCHEDULE_NOT_FOUND: 'SCHEDULE_NOT_FOUND',
   SCHEDULE_HAS_APPOINTMENTS: 'SCHEDULE_HAS_APPOINTMENTS',
   CONFIRMATION_MISMATCH: 'CONFIRMATION_MISMATCH',
+  PARAMS_INVALID_VALUE: 'PARAMS_INVALID_VALUE',
+  PARAMS_PATH_CONFLICT: 'PARAMS_PATH_CONFLICT',
+  PARAMS_PATH_BLOCKED: 'PARAMS_PATH_BLOCKED',
+  PARAMS_MASKED_VALUE: 'PARAMS_MASKED_VALUE',
+  PARAMS_REVISION_MISMATCH: 'PARAMS_REVISION_MISMATCH',
 } as const
 
 export type BrandErrorCode = (typeof BRAND_ERROR_CODES)[keyof typeof BRAND_ERROR_CODES]
@@ -395,3 +400,41 @@ export interface KioskSectionBodies {
 }
 
 export const KIOSK_STATUSES = ['AVAILABLE', 'PENDING', 'BUSY', 'MAINTENANCE', 'IN_USE', 'IN_USE_BY_KIOSK_USER', 'DISABLED'] as const
+
+// ---- Brand params editor ------------------------------------------------------
+
+export type JsonPrimitive = string | number | boolean | null
+export type JsonValue = JsonPrimitive | JsonValue[] | {[key: string]: JsonValue}
+export type JsonObject = {[key: string]: JsonValue}
+
+/**
+ * One edit on `brand.params`, addressed by object keys (`['smtp', 'host']`).
+ * Arrays are always replaced whole, so a path never contains an index. `set`
+ * creates missing intermediate objects; `unset` removes the key.
+ */
+export type ParamsOperation = {op: 'set'; path: string[]; value: JsonValue} | {op: 'unset'; path: string[]}
+
+/** What a secret leaf looks like once it leaves the server; the API refuses to write it back. */
+export const SECRET_MASK = '********'
+
+/** `GET /brands/:brandId/params`. */
+export interface BrandParamsPayload {
+  brandId: string
+  name: string
+  params: JsonObject
+  /** Dotted paths whose value came back masked (`smtp.password`, `metabase.secretKey`, …). */
+  secretPaths: string[]
+  /** Fingerprint of the stored params; sent back on save so a concurrent edit is refused instead of overwritten. */
+  revision: string
+}
+
+export interface UpdateBrandParamsRequest {
+  revision?: string
+  operations: ParamsOperation[]
+}
+
+export interface UpdateBrandParamsResult extends BrandParamsPayload {
+  /** Operations that changed something; no-ops are dropped server-side. */
+  applied: number
+  paths: string[]
+}

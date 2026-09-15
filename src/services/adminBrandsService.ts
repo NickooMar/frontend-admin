@@ -4,6 +4,7 @@ import type {
   AdminBrandSummary,
   AdminKioskDetail,
   BrandArchitecture,
+  BrandParamsPayload,
   DeleteResourceRequest,
   DeleteResourceResult,
   DuplicateKioskRequest,
@@ -11,6 +12,8 @@ import type {
   KioskEditSection,
   KioskSectionBodies,
   MoveKioskRequest,
+  UpdateBrandParamsRequest,
+  UpdateBrandParamsResult,
 } from '@/types/brands'
 
 const SECTION_PATHS: Record<KioskEditSection, string> = {
@@ -85,6 +88,22 @@ export const adminBrandsService = {
     const response = await api.delete<ApiEnvelope<DeleteResourceResult>>(`${ADMIN_BRANDS_PATH}/${brandId}/schedules/${scheduleId}`, {
       data: body,
     })
+    return unwrap(response)
+  },
+
+  /** The brand's `params` with secret leaves masked (see `secretPaths`) and the revision to send back on save. */
+  async getParams(brandId: string): Promise<BrandParamsPayload> {
+    const response = await api.get<ApiEnvelope<BrandParamsPayload>>(`${ADMIN_BRANDS_PATH}/${brandId}/params`)
+    return unwrap(response)
+  },
+
+  /**
+   * Path-addressed edits, applied as one atomic `$set`/`$unset`. Only the
+   * parameters that changed travel, so two admins editing different keys never
+   * overwrite each other; a stale `revision` is refused with 409.
+   */
+  async updateParams(brandId: string, body: UpdateBrandParamsRequest): Promise<UpdateBrandParamsResult> {
+    const response = await api.patch<ApiEnvelope<UpdateBrandParamsResult>>(`${ADMIN_BRANDS_PATH}/${brandId}/params`, body)
     return unwrap(response)
   },
 }

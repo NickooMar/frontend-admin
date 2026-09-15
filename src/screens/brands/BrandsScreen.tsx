@@ -1,6 +1,6 @@
-import {AlertCircleIcon, DatabaseIcon, GlobeIcon, RefreshCwIcon, Trash2Icon} from 'lucide-react'
+import {AlertCircleIcon, DatabaseIcon, GlobeIcon, RefreshCwIcon, SlidersHorizontalIcon, Trash2Icon} from 'lucide-react'
 import {useEffect, useState} from 'react'
-import {Navigate, useNavigate, useParams} from 'react-router-dom'
+import {Link, Navigate, useNavigate, useParams} from 'react-router-dom'
 import {lastBrandStorage} from '@/brands/lastBrand'
 import {useBrandsStore} from '@/brands/brandsStore'
 import {Alert, AlertDescription, AlertTitle} from '@/components/ui/alert'
@@ -168,6 +168,19 @@ export default function BrandsScreen() {
             <Trash2Icon aria-hidden data-icon="inline-start" />
             {COPY.includeDeleted}
           </Button>
+          {brandId ? (
+            <Button asChild variant="outline" size="default">
+              <Link to={`${brandPath(brandId)}/params`}>
+                <SlidersHorizontalIcon aria-hidden data-icon="inline-start" />
+                {COPY.params.open}
+              </Link>
+            </Button>
+          ) : (
+            <Button type="button" variant="outline" size="default" disabled>
+              <SlidersHorizontalIcon aria-hidden data-icon="inline-start" />
+              {COPY.params.open}
+            </Button>
+          )}
           <Button
             type="button"
             variant="outline"
