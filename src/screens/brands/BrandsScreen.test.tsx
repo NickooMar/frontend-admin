@@ -50,6 +50,7 @@ const kiosk: KioskNodeData = {
   examCount: 0,
   examNames: [],
   linkedUsers: [],
+  activeSession: null,
 }
 
 const architectureOf = (id: string): BrandArchitecture => ({
@@ -113,6 +114,7 @@ describe('BrandsScreen', () => {
     expect(screen.getByRole('combobox', {name: 'Marca'})).toHaveTextContent('Brand b')
     expect(screen.getByText('1 cabina')).toBeInTheDocument()
     expect(screen.getByText('diagnostica-b')).toBeInTheDocument()
+    expect(screen.getByRole('link', {name: 'Parámetros'})).toHaveAttribute('href', '/brands/b/params')
 
     expect(useAuthStore.getState().token).toBe('access')
     expect(useAuthStore.getState().admin).toEqual(admin)

@@ -3,7 +3,7 @@ import {Switch} from '@/components/ui/switch'
 import {STRINGS} from '@/lib/strings'
 import type {AdminKioskDetail, EcgFilterSetting, MonitorVital} from '@/types/brands'
 import type {ParamsDraft} from './kioskEditModel'
-import {NumberField, SectionTitle, SwitchRow} from './FormBits'
+import {FieldGroup, FormSection, NumberField, SwitchRow} from './FormBits'
 
 const COPY = STRINGS.brands.edit.params
 
@@ -34,142 +34,145 @@ export function ParamsForm({
   const welcomeVideo = detail.params?.welcomeVideo
 
   return (
-    <div className="flex flex-col gap-6">
-      <section className="flex flex-col gap-3">
-        <SectionTitle>{COPY.ecg}</SectionTitle>
-        <div className="grid gap-2">
-          <FilterRow
-            label={COPY.filterFrec}
-            setting={draft.ecg.filter.frec}
-            options={['x', 'z']}
-            onChange={(patch) => setFilter('frec', patch)}
-            disabled={disabled}
-          />
-          <FilterRow
-            label={COPY.filterMuscle}
-            setting={draft.ecg.filter.muscle}
-            options={['1', '2', '3', '4']}
-            onChange={(patch) => setFilter('muscle', patch)}
-            disabled={disabled}
-          />
-          <FilterRow
-            label={COPY.filterBaseline}
-            setting={draft.ecg.filter.baseline}
-            options={['1', '2', '3', '4']}
-            onChange={(patch) => setFilter('baseline', patch)}
-            disabled={disabled}
-          />
-        </div>
-        <div className="grid gap-3 sm:grid-cols-3">
-          <NumberField
-            label={COPY.stillHereStart}
-            value={draft.ecg.stillHereStart}
-            onChange={(stillHereStart) => setEcg({stillHereStart})}
-            min={0}
-            disabled={disabled}
-          />
-          <NumberField
-            label={COPY.stillHerePeriod}
-            value={draft.ecg.stillHerePeriod}
-            onChange={(stillHerePeriod) => setEcg({stillHerePeriod})}
-            min={0}
-            disabled={disabled}
-          />
-          <NumberField
-            label={COPY.stillHereCountdownPeriod}
-            value={draft.ecg.stillHereCountdownPeriod}
-            onChange={(stillHereCountdownPeriod) => setEcg({stillHereCountdownPeriod})}
-            min={0}
-            disabled={disabled}
-          />
-        </div>
-      </section>
-
-      <section className="flex flex-col gap-3">
-        <SectionTitle>{COPY.monitor}</SectionTitle>
-        <div className="overflow-x-auto">
-          <table className="w-full min-w-[440px] text-xs">
-            <thead>
-              <tr className="text-left text-muted-foreground">
-                <th className="pb-1 font-medium">{COPY.vital}</th>
-                <th className="pb-1 font-medium">{COPY.min}</th>
-                <th className="pb-1 font-medium">{COPY.max}</th>
-                <th className="pb-1 text-center font-medium">{COPY.alarm}</th>
-                <th className="pb-1 text-center font-medium">{COPY.on}</th>
-              </tr>
-            </thead>
-            <tbody>
-              {VITALS.map((key) => {
-                const vital = draft.monitor.config[key]
-                return (
-                  <tr key={key} className="border-t">
-                    <td className="py-1.5 pr-3 font-mono">{key}</td>
-                    <td className="py-1.5 pr-3">
-                      <NumberField
-                        label={`${key} ${COPY.min}`}
-                        value={vital.min}
-                        onChange={(min) => setVital(key, {min})}
-                        disabled={disabled}
-                        className="[&_label]:sr-only"
-                      />
-                    </td>
-                    <td className="py-1.5 pr-3">
-                      <NumberField
-                        label={`${key} ${COPY.max}`}
-                        value={vital.max}
-                        onChange={(max) => setVital(key, {max})}
-                        disabled={disabled}
-                        className="[&_label]:sr-only"
-                      />
-                    </td>
-                    <td className="py-1.5 text-center">
-                      <Switch
-                        aria-label={`${key} ${COPY.alarm}`}
-                        checked={vital.isAlarmActive}
-                        onCheckedChange={(isAlarmActive) => setVital(key, {isAlarmActive})}
-                        disabled={disabled}
-                      />
-                    </td>
-                    <td className="py-1.5 text-center">
-                      <Switch
-                        aria-label={`${key} ${COPY.on}`}
-                        checked={vital.switchOn}
-                        onCheckedChange={(switchOn) => setVital(key, {switchOn})}
-                        disabled={disabled}
-                      />
-                    </td>
-                  </tr>
-                )
-              })}
-            </tbody>
-          </table>
-        </div>
-
-        <div className="rounded-lg border p-3">
-          <div className="mb-2 flex items-center justify-between">
-            <span className="font-mono text-xs">NIBP</span>
-            <div className="flex items-center gap-4 text-xs text-muted-foreground">
-              <span className="flex items-center gap-2">
-                {COPY.alarm}
-                <Switch
-                  aria-label={`NIBP ${COPY.alarm}`}
-                  checked={draft.monitor.config.NIBP.isAlarmActive}
-                  onCheckedChange={(isAlarmActive) => setNibp({isAlarmActive})}
-                  disabled={disabled}
-                />
-              </span>
-              <span className="flex items-center gap-2">
-                {COPY.on}
-                <Switch
-                  aria-label={`NIBP ${COPY.on}`}
-                  checked={draft.monitor.config.NIBP.switchOn}
-                  onCheckedChange={(switchOn) => setNibp({switchOn})}
-                  disabled={disabled}
-                />
-              </span>
-            </div>
+    <div className="flex flex-col gap-4">
+      <FormSection title={COPY.ecg} description={COPY.ecgHint}>
+        <FieldGroup label={COPY.filtersGroup}>
+          <div className="overflow-hidden rounded-lg border">
+            <FilterRow
+              label={COPY.filterFrec}
+              setting={draft.ecg.filter.frec}
+              options={['x', 'z']}
+              onChange={(patch) => setFilter('frec', patch)}
+              disabled={disabled}
+            />
+            <FilterRow
+              label={COPY.filterMuscle}
+              setting={draft.ecg.filter.muscle}
+              options={['1', '2', '3', '4']}
+              onChange={(patch) => setFilter('muscle', patch)}
+              disabled={disabled}
+            />
+            <FilterRow
+              label={COPY.filterBaseline}
+              setting={draft.ecg.filter.baseline}
+              options={['1', '2', '3', '4']}
+              onChange={(patch) => setFilter('baseline', patch)}
+              disabled={disabled}
+            />
           </div>
-          <div className="grid gap-3 sm:grid-cols-5">
+        </FieldGroup>
+
+        <FieldGroup label={COPY.stillHereGroup}>
+          <div className="grid gap-3 sm:grid-cols-3">
+            <NumberField
+              label={COPY.stillHereStart}
+              value={draft.ecg.stillHereStart}
+              onChange={(stillHereStart) => setEcg({stillHereStart})}
+              min={0}
+              disabled={disabled}
+            />
+            <NumberField
+              label={COPY.stillHerePeriod}
+              value={draft.ecg.stillHerePeriod}
+              onChange={(stillHerePeriod) => setEcg({stillHerePeriod})}
+              min={0}
+              disabled={disabled}
+            />
+            <NumberField
+              label={COPY.stillHereCountdownPeriod}
+              value={draft.ecg.stillHereCountdownPeriod}
+              onChange={(stillHereCountdownPeriod) => setEcg({stillHereCountdownPeriod})}
+              min={0}
+              disabled={disabled}
+            />
+          </div>
+        </FieldGroup>
+      </FormSection>
+
+      <FormSection title={COPY.monitor} description={COPY.monitorHint}>
+        <FieldGroup label={COPY.vitalsGroup}>
+          <div className="overflow-x-auto">
+            <table className="w-full min-w-[400px] text-xs">
+              <thead>
+                <tr className="text-left text-muted-foreground">
+                  <th className="w-12 pb-1.5 font-medium">{COPY.vital}</th>
+                  <th className="pb-1.5 pr-3 font-medium">{COPY.min}</th>
+                  <th className="pb-1.5 pr-3 font-medium">{COPY.max}</th>
+                  <th className="w-16 pb-1.5 text-center font-medium">{COPY.alarm}</th>
+                  <th className="w-20 pb-1.5 text-center font-medium">{COPY.on}</th>
+                </tr>
+              </thead>
+              <tbody>
+                {VITALS.map((key) => {
+                  const vital = draft.monitor.config[key]
+                  return (
+                    <tr key={key} className="border-t">
+                      <td className="py-1.5 pr-3 font-mono">{key}</td>
+                      <td className="py-1.5 pr-3">
+                        <NumberField
+                          label={`${key} ${COPY.min}`}
+                          value={vital.min}
+                          onChange={(min) => setVital(key, {min})}
+                          disabled={disabled}
+                          className="[&_label]:sr-only"
+                        />
+                      </td>
+                      <td className="py-1.5 pr-3">
+                        <NumberField
+                          label={`${key} ${COPY.max}`}
+                          value={vital.max}
+                          onChange={(max) => setVital(key, {max})}
+                          disabled={disabled}
+                          className="[&_label]:sr-only"
+                        />
+                      </td>
+                      <td className="py-1.5 text-center">
+                        <Switch
+                          aria-label={`${key} ${COPY.alarm}`}
+                          checked={vital.isAlarmActive}
+                          onCheckedChange={(isAlarmActive) => setVital(key, {isAlarmActive})}
+                          disabled={disabled}
+                        />
+                      </td>
+                      <td className="py-1.5 text-center">
+                        <Switch
+                          aria-label={`${key} ${COPY.on}`}
+                          checked={vital.switchOn}
+                          onCheckedChange={(switchOn) => setVital(key, {switchOn})}
+                          disabled={disabled}
+                        />
+                      </td>
+                    </tr>
+                  )
+                })}
+              </tbody>
+            </table>
+          </div>
+        </FieldGroup>
+
+        {/* NIBP is the one signal with four thresholds and its own cadence, so it cannot ride in the table. */}
+        <FieldGroup label={COPY.nibpGroup}>
+          <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-muted-foreground">
+            <span className="flex items-center gap-2">
+              {COPY.alarm}
+              <Switch
+                aria-label={`NIBP ${COPY.alarm}`}
+                checked={draft.monitor.config.NIBP.isAlarmActive}
+                onCheckedChange={(isAlarmActive) => setNibp({isAlarmActive})}
+                disabled={disabled}
+              />
+            </span>
+            <span className="flex items-center gap-2">
+              {COPY.on}
+              <Switch
+                aria-label={`NIBP ${COPY.on}`}
+                checked={draft.monitor.config.NIBP.switchOn}
+                onCheckedChange={(switchOn) => setNibp({switchOn})}
+                disabled={disabled}
+              />
+            </span>
+          </div>
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-5">
             <NumberField
               label={COPY.minSys}
               value={draft.monitor.config.NIBP.minSys}
@@ -202,9 +205,9 @@ export function ParamsForm({
               disabled={disabled}
             />
           </div>
-        </div>
+        </FieldGroup>
 
-        <div className="grid items-end gap-3 sm:grid-cols-2">
+        <FieldGroup label={COPY.monitorExtrasGroup}>
           <SwitchRow
             label={COPY.showInstructions}
             checked={draft.monitor.showInstructions}
@@ -217,19 +220,19 @@ export function ParamsForm({
             onChange={(alarmInterval) => setMonitor({alarmInterval})}
             min={0}
             disabled={disabled}
+            className="sm:max-w-56"
           />
-        </div>
-      </section>
+        </FieldGroup>
+      </FormSection>
 
-      <section className="flex flex-col gap-3">
-        <SectionTitle>{COPY.network}</SectionTitle>
-        <SwitchRow
-          label={COPY.networkEnabled}
-          checked={draft.networkQuality.enabled}
-          onCheckedChange={(enabled) => setNetwork({enabled})}
-          disabled={disabled}
-        />
-        <div className="grid gap-3 sm:grid-cols-3">
+      <FormSection title={COPY.network} description={COPY.networkHint}>
+        <FieldGroup>
+          <SwitchRow
+            label={COPY.networkEnabled}
+            checked={draft.networkQuality.enabled}
+            onCheckedChange={(enabled) => setNetwork({enabled})}
+            disabled={disabled}
+          />
           <NumberField
             label={COPY.intervalMs}
             value={draft.networkQuality.intervalMs}
@@ -237,57 +240,67 @@ export function ParamsForm({
             min={5000}
             max={3600000}
             disabled={disabled}
+            className="sm:max-w-56"
           />
-          <NumberField
-            label={COPY.minDownloadKbps}
-            value={draft.networkQuality.minDownloadKbps}
-            onChange={(minDownloadKbps) => setNetwork({minDownloadKbps})}
-            min={0}
-            disabled={disabled}
-          />
-          <NumberField
-            label={COPY.minUploadKbps}
-            value={draft.networkQuality.minUploadKbps}
-            onChange={(minUploadKbps) => setNetwork({minUploadKbps})}
-            min={0}
-            disabled={disabled}
-          />
-          <NumberField
-            label={COPY.maxLatencyMs}
-            value={draft.networkQuality.maxLatencyMs}
-            onChange={(maxLatencyMs) => setNetwork({maxLatencyMs})}
-            min={1}
-            disabled={disabled}
-          />
-          <NumberField
-            label={COPY.maxPacketLossPercent}
-            value={draft.networkQuality.maxPacketLossPercent}
-            onChange={(maxPacketLossPercent) => setNetwork({maxPacketLossPercent})}
-            min={0}
-            max={100}
-            disabled={disabled}
-          />
-        </div>
-      </section>
+        </FieldGroup>
 
-      <section className="flex flex-col gap-1">
-        <SectionTitle>{COPY.modes}</SectionTitle>
-        <SwitchRow
-          label={COPY.keyboardMode}
-          checked={draft.keyboardMode}
-          onCheckedChange={(keyboardMode) => onChange({...draft, keyboardMode})}
-          disabled={disabled}
-        />
-        <SwitchRow
-          label={COPY.assistantMode}
-          checked={draft.assistantMode}
-          onCheckedChange={(assistantMode) => onChange({...draft, assistantMode})}
-          disabled={disabled}
-        />
+        <FieldGroup label={COPY.networkThresholdsGroup}>
+          <div className="grid gap-3 sm:grid-cols-2">
+            <NumberField
+              label={COPY.minDownloadKbps}
+              value={draft.networkQuality.minDownloadKbps}
+              onChange={(minDownloadKbps) => setNetwork({minDownloadKbps})}
+              min={0}
+              disabled={disabled}
+            />
+            <NumberField
+              label={COPY.minUploadKbps}
+              value={draft.networkQuality.minUploadKbps}
+              onChange={(minUploadKbps) => setNetwork({minUploadKbps})}
+              min={0}
+              disabled={disabled}
+            />
+            <NumberField
+              label={COPY.maxLatencyMs}
+              value={draft.networkQuality.maxLatencyMs}
+              onChange={(maxLatencyMs) => setNetwork({maxLatencyMs})}
+              min={1}
+              disabled={disabled}
+            />
+            <NumberField
+              label={COPY.maxPacketLossPercent}
+              value={draft.networkQuality.maxPacketLossPercent}
+              onChange={(maxPacketLossPercent) => setNetwork({maxPacketLossPercent})}
+              min={0}
+              max={100}
+              disabled={disabled}
+            />
+          </div>
+        </FieldGroup>
+      </FormSection>
+
+      <FormSection title={COPY.modes} description={COPY.modesHint}>
+        <FieldGroup>
+          <SwitchRow
+            label={COPY.keyboardMode}
+            checked={draft.keyboardMode}
+            onCheckedChange={(keyboardMode) => onChange({...draft, keyboardMode})}
+            disabled={disabled}
+          />
+          <SwitchRow
+            label={COPY.assistantMode}
+            checked={draft.assistantMode}
+            onCheckedChange={(assistantMode) => onChange({...draft, assistantMode})}
+            disabled={disabled}
+          />
+        </FieldGroup>
+
         {welcomeVideo?.key ? (
-          <p className="pt-1 text-xs text-muted-foreground">{COPY.welcomeVideo(welcomeVideo.originalName ?? welcomeVideo.key)}</p>
+          <FieldGroup>
+            <p className="text-xs text-muted-foreground">{COPY.welcomeVideo(welcomeVideo.originalName ?? welcomeVideo.key)}</p>
+          </FieldGroup>
         ) : null}
-      </section>
+      </FormSection>
     </div>
   )
 }
@@ -306,7 +319,7 @@ function FilterRow({
   disabled?: boolean
 }) {
   return (
-    <div className="flex items-center justify-between gap-3 rounded-lg border px-3 py-2">
+    <div className="flex items-center justify-between gap-3 px-3 py-2 not-last:border-b">
       <span className="text-sm">{label}</span>
       <div className="flex items-center gap-3">
         <span className="flex items-center gap-2 text-xs text-muted-foreground">

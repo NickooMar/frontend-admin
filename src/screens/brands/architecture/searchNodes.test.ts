@@ -18,6 +18,7 @@ const kiosk = (id: string, type: KioskNodeData['type'], location: string, extra:
   examCount: 0,
   examNames: [],
   linkedUsers: [],
+  activeSession: null,
   ...extra,
 })
 

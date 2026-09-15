@@ -37,6 +37,7 @@ const kiosk: KioskNodeData = {
   examCount: 2,
   examNames: ['ECG', 'SPO2'],
   linkedUsers: [],
+  activeSession: null,
 }
 
 const apiError = (status: number, body: Record<string, unknown>) =>

@@ -21,11 +21,21 @@ function describe(node: CanvasNode): {kind: SearchResultKind; label: string; det
       const {data} = node
       const kind: SearchResultKind = data.type === 'MULTI' ? 'multi' : 'kiosk'
       const accounts = data.linkedUsers.flatMap((user) => [user.email, user.name])
+      // The patient occupying the cabin, so «¿dónde está Marsili?» finds it.
+      const patient = data.activeSession?.patient
       return {
         kind,
         label: data.location,
         detail: kind === 'multi' ? KINDS.multi : KINDS.kiosk,
-        haystack: [data.location, kind === 'multi' ? KINDS.multi : KINDS.kiosk, data.status ?? '', ...accounts, ...data.examNames],
+        haystack: [
+          data.location,
+          kind === 'multi' ? KINDS.multi : KINDS.kiosk,
+          data.status ?? '',
+          ...accounts,
+          ...data.examNames,
+          patient?.unidentified ? '' : (patient?.name ?? ''),
+          patient?.idValue ?? '',
+        ],
       }
     }
     case 'schedule': {

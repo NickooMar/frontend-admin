@@ -1,9 +1,12 @@
 import {Handle, type NodeProps, Position} from '@xyflow/react'
-import {CalendarDaysIcon, ClockIcon, UsersRoundIcon} from 'lucide-react'
+import {CalendarDaysIcon, ClockIcon, MoreHorizontalIcon, Trash2Icon, UsersRoundIcon} from 'lucide-react'
 import {memo} from 'react'
 import {Badge} from '@/components/ui/badge'
+import {Button} from '@/components/ui/button'
+import {DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger} from '@/components/ui/dropdown-menu'
 import {STRINGS} from '@/lib/strings'
 import {cn} from '@/lib/utils'
+import {useScheduleActions} from '../../canvasActions'
 import type {ScheduleFlowNode} from '../buildGraph'
 import {NodeRow} from './NodeRow'
 
@@ -12,6 +15,7 @@ const COPY = STRINGS.brands.schedule
 export const SCHEDULE_TILE = 'bg-emerald-500/12 text-emerald-700 dark:text-emerald-300'
 
 export const ScheduleNode = memo(function ScheduleNode({data, selected}: NodeProps<ScheduleFlowNode>) {
+  const onAction = useScheduleActions()
   const palette = data.colorPalette
   const swatch =
     palette?.background || palette?.iconColor
@@ -45,6 +49,26 @@ export const ScheduleNode = memo(function ScheduleNode({data, selected}: NodePro
             </div>
           ) : null}
         </div>
+
+        {data.deleted ? null : (
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                variant="ghost"
+                size="icon-sm"
+                aria-label={`${COPY.actions} ${data.name}`}
+                className="nodrag nopan -mr-1.5 -mt-1 text-muted-foreground">
+                <MoreHorizontalIcon aria-hidden />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="nodrag nopan w-48">
+              <DropdownMenuItem variant="destructive" onSelect={() => onAction('delete', data)}>
+                <Trash2Icon aria-hidden />
+                {STRINGS.brands.delete.menu}
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        )}
       </header>
 
       <div className="flex flex-col border-t">

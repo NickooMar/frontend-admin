@@ -13,7 +13,10 @@ import {
   SlidersHorizontalIcon,
   StethoscopeIcon,
   TagIcon,
+  Trash2Icon,
+  UserRoundIcon,
   UsersRoundIcon,
+  VideoIcon,
   WifiIcon,
   WifiOffIcon,
 } from 'lucide-react'
@@ -30,11 +33,11 @@ import {
   DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-import {formatDateTime} from '@/lib/format'
+import {formatDateTime, formatElapsed} from '@/lib/format'
 import {STRINGS} from '@/lib/strings'
 import {cn} from '@/lib/utils'
-import {KIOSK_EDIT_SECTIONS, type KioskNodeData} from '@/types/brands'
-import {useKioskActions} from '../../kioskActions'
+import {type ActiveSessionSummary, KIOSK_EDIT_SECTIONS, type KioskNodeData} from '@/types/brands'
+import {useKioskActions} from '../../canvasActions'
 import type {KioskFlowNode} from '../buildGraph'
 import {NodeRow} from './NodeRow'
 
@@ -73,12 +76,63 @@ function connectionDetail(data: KioskNodeData): string | null {
   return when ? COPY.lastConnected(when) : COPY.neverConnected
 }
 
+const SESSION = COPY.session
+
+type ActivePatient = NonNullable<ActiveSessionSummary['patient']>
+type ActiveVideoVisit = NonNullable<ActiveSessionSummary['videoVisit']>
+
+/** An `nn` id is a random token, so the document is only worth showing for an identified patient. */
+function patientDocument(patient: ActivePatient): string | null {
+  if (patient.unidentified || !patient.idValue) return null
+  return SESSION.document(patient.idType ?? '', patient.idValue).trim()
+}
+
+/**
+ * Who is being attended right now. The elapsed time is on the row rather than
+ * only in the tooltip because a cabin that dropped mid-visit keeps reporting
+ * «En uso» for as long as nobody closes the session.
+ */
+function PatientRow({session}: {session: ActiveSessionSummary}) {
+  const patient = session.patient
+  if (!patient) return null
+
+  const label = patient.unidentified ? SESSION.anonymousPatient : patient.name
+  const since = formatElapsed(session.patientEnteredAt ?? session.startDate)
+
+  return (
+    <NodeRow
+      icon={UserRoundIcon}
+      className="text-foreground"
+      title={[label, patientDocument(patient), since && SESSION.patientSince(since)].filter(Boolean).join(' · ')}>
+      <span className={cn('truncate font-medium', patient.unidentified && 'font-normal text-muted-foreground italic')}>{label}</span>
+      {since ? <span className="ml-auto shrink-0 text-[11px] text-muted-foreground">{since}</span> : null}
+    </NodeRow>
+  )
+}
+
+/** Waiting for a professional reads as pending; a call already answered reads as live. */
+const videoVisitTone = (status: string): string =>
+  status === 'ACCEPTED' ? 'text-emerald-600 dark:text-emerald-400' : 'text-amber-600 dark:text-amber-400'
+
+function VideoVisitRow({visit}: {visit: ActiveVideoVisit}) {
+  const label = SESSION.videoVisit[visit.status] ?? SESSION.videoVisitFallback
+  const professional = visit.professional ? SESSION.withProfessional(visit.professional.fullName) : null
+
+  return (
+    <NodeRow icon={VideoIcon} className={videoVisitTone(visit.status)} title={[label, professional].filter(Boolean).join(' ')}>
+      <span className="shrink-0">{label}</span>
+      {professional ? <span className="truncate text-muted-foreground">{professional}</span> : null}
+    </NodeRow>
+  )
+}
+
 export const KioskNode = memo(function KioskNode({data, selected}: NodeProps<KioskFlowNode>) {
   const onAction = useKioskActions()
   const isMulti = data.type === 'MULTI'
   const Icon = isMulti ? PanelsTopLeftIcon : MonitorIcon
   const detail = connectionDetail(data)
   const accounts = data.linkedUsers.map((user) => user.email || user.name).filter(Boolean)
+  const session = data.activeSession
 
   return (
     <article
@@ -146,6 +200,15 @@ export const KioskNode = memo(function KioskNode({data, selected}: NodeProps<Kio
               <MoveRightIcon aria-hidden />
               {COPY.move}
             </DropdownMenuItem>
+            {data.deleted ? null : (
+              <>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem variant="destructive" onSelect={() => onAction('delete', data)}>
+                  <Trash2Icon aria-hidden />
+                  {STRINGS.brands.delete.menu}
+                </DropdownMenuItem>
+              </>
+            )}
           </DropdownMenuContent>
         </DropdownMenu>
       </header>
@@ -155,6 +218,8 @@ export const KioskNode = memo(function KioskNode({data, selected}: NodeProps<Kio
           <span aria-hidden className={cn('size-1.5 shrink-0 rounded-full', statusTone(data))} />
           <span className="truncate">{connectionLabel(data)}</span>
         </NodeRow>
+        {session ? <PatientRow session={session} /> : null}
+        {session?.videoVisit ? <VideoVisitRow visit={session.videoVisit} /> : null}
         <NodeRow icon={ActivityIcon} title={data.examNames.join(', ') || undefined}>
           {data.examCount > 0 ? COPY.exams(data.examCount) : COPY.noExams}
         </NodeRow>

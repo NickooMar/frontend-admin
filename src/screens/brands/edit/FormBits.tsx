@@ -12,6 +12,47 @@ export function SectionTitle({children, className}: {children: React.ReactNode; 
   return <h3 className={cn('text-[11px] font-medium tracking-[0.06em] text-muted-foreground uppercase', className)}>{children}</h3>
 }
 
+/**
+ * One self-contained block of a long form. The dialog body is already a card,
+ * so an uppercase caption alone does not separate anything: the panel gives each
+ * group of parameters its own surface and a header that says what it configures.
+ */
+export function FormSection({
+  title,
+  description,
+  children,
+  className,
+}: {
+  title: string
+  description?: string
+  children: React.ReactNode
+  className?: string
+}) {
+  return (
+    <section className={cn('rounded-xl border bg-card/40', className)}>
+      <header className="border-b px-4 py-2.5">
+        <h3 className="text-sm leading-5 font-semibold">{title}</h3>
+        {description ? <p className="mt-0.5 text-xs text-pretty text-muted-foreground">{description}</p> : null}
+      </header>
+      <div className="flex flex-col gap-4 p-4">{children}</div>
+    </section>
+  )
+}
+
+/**
+ * A group of related fields inside a `FormSection`. Consecutive groups are
+ * split by a rule instead of another border, so nesting never stacks two
+ * rounded surfaces.
+ */
+export function FieldGroup({label, children, className}: {label?: string; children: React.ReactNode; className?: string}) {
+  return (
+    <div className={cn('flex flex-col gap-2.5 not-first:border-t not-first:pt-4', className)}>
+      {label ? <h4 className="text-xs font-medium">{label}</h4> : null}
+      {children}
+    </div>
+  )
+}
+
 export function SwitchRow({
   label,
   checked,
