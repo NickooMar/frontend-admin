@@ -17,12 +17,15 @@ import {
   isEditAction,
   type KioskAction,
   type KioskNodeData,
+  type ScheduleAction,
+  type ScheduleNodeData,
 } from '@/types/brands'
 import {ArchitectureCanvas} from './architecture/ArchitectureCanvas'
 import {BrandSelector} from './BrandSelector'
+import {KioskActionsContext, ScheduleActionsContext} from './canvasActions'
+import {type DeletionTarget, DeleteResourceDialog} from './DeleteResourceDialog'
 import {KioskEditDialog} from './edit/KioskEditDialog'
 import {brandErrorMessage, KioskActionDialog} from './KioskActionDialog'
-import {KioskActionsContext} from './kioskActions'
 
 const COPY = STRINGS.brands
 
@@ -105,7 +108,8 @@ export default function BrandsScreen() {
   const loadArchitecture = useBrandsStore((state) => state.loadArchitecture)
   const setIncludeDeleted = useBrandsStore((state) => state.setIncludeDeleted)
 
-  const [dialog, setDialog] = useState<{action: KioskAction; kiosk: KioskNodeData} | null>(null)
+  const [dialog, setDialog] = useState<{action: Exclude<KioskAction, 'delete'>; kiosk: KioskNodeData} | null>(null)
+  const [deleting, setDeleting] = useState<DeletionTarget | null>(null)
 
   useEffect(() => {
     void loadBrands()
@@ -128,7 +132,16 @@ export default function BrandsScreen() {
   const current = architecture && architectureBrandId === brandId ? architecture : null
   const isEmpty = current !== null && current.nodes.length === 0
 
-  const handleAction = (action: KioskAction, kiosk: KioskNodeData) => setDialog({action, kiosk})
+  const handleAction = (action: KioskAction, kiosk: KioskNodeData) => {
+    if (action === 'delete') setDeleting({kind: 'kiosk', kiosk})
+    else setDialog({action, kiosk})
+  }
+
+  const handleScheduleAction = (_action: ScheduleAction, schedule: ScheduleNodeData) => setDeleting({kind: 'schedule', schedule})
+
+  const refreshCanvas = () => {
+    if (brandId) void loadArchitecture(brandId, {force: true})
+  }
 
   return (
     <div className="flex min-h-0 flex-1 flex-col gap-4">
@@ -216,7 +229,9 @@ export default function BrandsScreen() {
             </div>
           ) : (
             <KioskActionsContext.Provider value={handleAction}>
-              <ArchitectureCanvas architecture={current} />
+              <ScheduleActionsContext.Provider value={handleScheduleAction}>
+                <ArchitectureCanvas architecture={current} />
+              </ScheduleActionsContext.Provider>
             </KioskActionsContext.Provider>
           )
         ) : brandId || brandsStatus !== 'ready' ? (
@@ -231,9 +246,7 @@ export default function BrandsScreen() {
           kiosk={dialog.kiosk}
           brand={selectedBrand}
           onClose={() => setDialog(null)}
-          onSaved={() => {
-            if (brandId) void loadArchitecture(brandId, {force: true})
-          }}
+          onSaved={refreshCanvas}
         />
       ) : dialog && selectedBrand && !isEditAction(dialog.action) ? (
         <KioskActionDialog
@@ -244,8 +257,18 @@ export default function BrandsScreen() {
           brands={brands}
           onClose={() => setDialog(null)}
           onDuplicated={(result) => {
-            if (result.targetBrandId === brandId) void loadArchitecture(brandId, {force: true})
+            if (result.targetBrandId === brandId) refreshCanvas()
           }}
+        />
+      ) : null}
+
+      {deleting && selectedBrand ? (
+        <DeleteResourceDialog
+          key={`delete:${deleting.kind}:${deleting.kind === 'kiosk' ? deleting.kiosk._id : deleting.schedule._id}`}
+          target={deleting}
+          brand={selectedBrand}
+          onClose={() => setDeleting(null)}
+          onDeleted={refreshCanvas}
         />
       ) : null}
     </div>

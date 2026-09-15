@@ -32,6 +32,31 @@ export function formatDate(value: string | null | undefined): string | null {
   return date && compactDate(date)
 }
 
+const RELATIVE = new Intl.RelativeTimeFormat('es-AR', {numeric: 'auto', style: 'long'})
+
+/** Units coarse enough to read at a glance; a visit older than a day is reported in days. */
+const RELATIVE_UNITS: Array<[Intl.RelativeTimeFormatUnit, number]> = [
+  ['day', 86_400_000],
+  ['hour', 3_600_000],
+  ['minute', 60_000],
+]
+
+/**
+ * `hace 12 minutos` — how long ago something started. Rounds towards zero, so
+ * anything under a minute reads «recién». Null for a missing or unparseable value.
+ */
+export function formatElapsed(value: string | null | undefined, now: Date = new Date()): string | null {
+  const date = parse(value)
+  if (!date) return null
+
+  const elapsed = now.getTime() - date.getTime()
+  for (const [unit, size] of RELATIVE_UNITS) {
+    const amount = Math.trunc(elapsed / size)
+    if (amount !== 0) return RELATIVE.format(-amount, unit)
+  }
+  return 'recién'
+}
+
 /** Two-letter monogram for the header avatar. */
 export function initials(name: string, surname: string): string {
   const letters = `${name.charAt(0)}${surname.charAt(0)}`.trim()

@@ -50,6 +50,7 @@ const kiosk: KioskNodeData = {
   examCount: 0,
   examNames: [],
   linkedUsers: [],
+  activeSession: null,
 }
 
 const architectureOf = (id: string): BrandArchitecture => ({

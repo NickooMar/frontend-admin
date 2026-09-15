@@ -49,7 +49,8 @@ export const SIZES = {
 } as const
 
 export function estimateKioskHeight(data: KioskNodeData): number {
-  const rows = 2 + (data.linkedUsers.length > 0 ? 1 : 0)
+  const sessionRows = (data.activeSession?.patient ? 1 : 0) + (data.activeSession?.videoVisit ? 1 : 0)
+  const rows = 2 + sessionRows + (data.linkedUsers.length > 0 ? 1 : 0)
   const badges = data.keyboardMode || data.assistantMode || data.deleted ? 22 : 0
   return 74 + badges + rows * 26
 }

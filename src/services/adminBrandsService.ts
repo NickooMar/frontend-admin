@@ -4,6 +4,8 @@ import type {
   AdminBrandSummary,
   AdminKioskDetail,
   BrandArchitecture,
+  DeleteResourceRequest,
+  DeleteResourceResult,
   DuplicateKioskRequest,
   DuplicateKioskResult,
   KioskEditSection,
@@ -65,5 +67,24 @@ export const adminBrandsService = {
   /** Boundary endpoint: today the backend validates everything and answers 501 MOVE_NOT_IMPLEMENTED. */
   async moveKiosk(brandId: string, kioskId: string, body: MoveKioskRequest): Promise<void> {
     await api.post(`${ADMIN_BRANDS_PATH}/${brandId}/kiosks/${kioskId}/move`, body)
+  },
+
+  /**
+   * Logical deletion (`deleted: true`); the document and its history stay.
+   * `confirmName` is the name the admin typed and the server re-checks it, so
+   * the request is refused when the panel is showing a stale card.
+   */
+  async deleteKiosk(brandId: string, kioskId: string, body: DeleteResourceRequest): Promise<DeleteResourceResult> {
+    const response = await api.delete<ApiEnvelope<DeleteResourceResult>>(`${ADMIN_BRANDS_PATH}/${brandId}/kiosks/${kioskId}`, {
+      data: body,
+    })
+    return unwrap(response)
+  },
+
+  async deleteSchedule(brandId: string, scheduleId: string, body: DeleteResourceRequest): Promise<DeleteResourceResult> {
+    const response = await api.delete<ApiEnvelope<DeleteResourceResult>>(`${ADMIN_BRANDS_PATH}/${brandId}/schedules/${scheduleId}`, {
+      data: body,
+    })
+    return unwrap(response)
   },
 }

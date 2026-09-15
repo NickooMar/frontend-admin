@@ -29,6 +29,39 @@ export interface LinkedUserSummary {
   scheduleCount: number
 }
 
+/** Latest attention on a live videovisit — where the professional's name comes from. */
+export interface ActiveProfessionalSummary {
+  fullName: string
+  enrollment: string | null
+}
+
+/** Videovisit still open (`PENDING` waiting for a professional, `ACCEPTED` in call) on the active session. */
+export interface ActiveVideoVisitSummary {
+  _id: string
+  status: string
+  startDate: string | null
+  professional: ActiveProfessionalSummary | null
+}
+
+/** Multi flows admit anonymous patients as a `-` / `-` record, so `name` can legitimately be empty. */
+export interface ActivePatientSummary {
+  _id: string
+  name: string
+  idType: string | null
+  idValue: string | null
+  unidentified: boolean
+}
+
+/** The session currently occupying a kiosk. Only sent while the kiosk's own status says it is busy. */
+export interface ActiveSessionSummary {
+  _id: string
+  type: KioskType
+  startDate: string | null
+  patientEnteredAt: string | null
+  patient: ActivePatientSummary | null
+  videoVisit: ActiveVideoVisitSummary | null
+}
+
 export type KioskNodeData = {
   _id: string
   type: KioskType
@@ -44,6 +77,7 @@ export type KioskNodeData = {
   examCount: number
   examNames: string[]
   linkedUsers: LinkedUserSummary[]
+  activeSession: ActiveSessionSummary | null
 }
 
 export interface ScheduleColorPalette {
@@ -160,6 +194,18 @@ export interface MoveKioskRequest {
   targetBrandId: string
 }
 
+/** Body of both DELETE endpoints: the name the admin typed, re-checked server-side. */
+export interface DeleteResourceRequest {
+  confirmName: string
+}
+
+export interface DeleteResourceResult {
+  _id: string
+  kind: 'kiosk' | 'schedule'
+  name: string
+  deleted: true
+}
+
 export const BRAND_ERROR_CODES = {
   BRAND_NOT_FOUND: 'BRAND_NOT_FOUND',
   TENANT_UNAVAILABLE: 'TENANT_UNAVAILABLE',
@@ -168,6 +214,9 @@ export const BRAND_ERROR_CODES = {
   TARGET_TENANT_UNAVAILABLE: 'TARGET_TENANT_UNAVAILABLE',
   KIOSK_BUSY: 'KIOSK_BUSY',
   MOVE_NOT_IMPLEMENTED: 'MOVE_NOT_IMPLEMENTED',
+  SCHEDULE_NOT_FOUND: 'SCHEDULE_NOT_FOUND',
+  SCHEDULE_HAS_APPOINTMENTS: 'SCHEDULE_HAS_APPOINTMENTS',
+  CONFIRMATION_MISMATCH: 'CONFIRMATION_MISMATCH',
 } as const
 
 export type BrandErrorCode = (typeof BRAND_ERROR_CODES)[keyof typeof BRAND_ERROR_CODES]
@@ -176,11 +225,14 @@ export type BrandErrorCode = (typeof BRAND_ERROR_CODES)[keyof typeof BRAND_ERROR
 export const KIOSK_EDIT_SECTIONS = ['data', 'version', 'devices', 'availableExams', 'params'] as const
 export type KioskEditSection = (typeof KIOSK_EDIT_SECTIONS)[number]
 
-export type KioskAction = 'duplicate' | 'move' | `edit:${KioskEditSection}`
-export type KioskTransferAction = Exclude<KioskAction, `edit:${string}`>
+export type KioskAction = 'duplicate' | 'move' | 'delete' | `edit:${KioskEditSection}`
+export type KioskTransferAction = Extract<KioskAction, 'duplicate' | 'move'>
 
 export const isEditAction = (action: KioskAction): action is `edit:${KioskEditSection}` => action.startsWith('edit:')
 export const editSectionOf = (action: `edit:${KioskEditSection}`): KioskEditSection => action.slice('edit:'.length) as KioskEditSection
+
+/** The only agenda operation the admin canvas offers today. */
+export type ScheduleAction = 'delete'
 
 export interface KioskDevice {
   type?: string

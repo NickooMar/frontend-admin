@@ -41,6 +41,7 @@ const kiosk: KioskNodeData = {
   examCount: 0,
   examNames: [],
   linkedUsers: [],
+  activeSession: null,
 }
 
 const detail: AdminKioskDetail = {
